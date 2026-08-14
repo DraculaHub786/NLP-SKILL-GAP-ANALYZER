@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r backend/requirements.txt
+      - run: python -m spacy download en_core_web_sm
+      - name: Backend tests (hard gate)
+        run: cd backend && python -m pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Install
+        run: cd frontend && npm ci
+      - name: Typecheck
+        run: cd frontend && npm run typecheck
+      - name: Unit tests
+        run: cd frontend && npm run test
+      - name: Build
+        run: cd frontend && npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: pip install -r backend/requirements.txt
+      - run: python -m spacy download en_core_web_sm
+      - name: Playwright browsers
+        run: cd frontend && npx playwright install --with-deps chromium
+      - name: E2E — full flow + failure paths
+        run: cd frontend && npx playwright test

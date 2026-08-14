@@ -1,0 +1,11 @@
+# Optional: Skill-NER training + evaluation stack.
+# Required only to run app/ml/train_ner.py and app/ml/evaluate_ner.py
+# (see docs/NER_MODEL_GUIDE.md). The API at runtime degrades gracefully
+# without these — install them only on training machines/CI.
+# Install with: pip install -r requirements-ml.txt
+torch==2.4.1
+transformers==4.44.2
+datasets==2.21.0
+seqeval==1.2.2
+accelerate==0.34.2
+optimum[onnxruntime]==1.22.0

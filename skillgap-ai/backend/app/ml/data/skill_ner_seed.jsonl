@@ -1,0 +1,20 @@
+{"tokens": ["Built", "data", "pipelines", "using", "Apache", "Airflow", "and", "dbt", "."], "tags": ["O", "O", "O", "O", "B-SKILL", "I-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Experienced", "with", "React", ",", "TypeScript", "and", "GraphQL", "."], "tags": ["O", "O", "B-SKILL", "O", "B-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Strong", "background", "in", "machine", "learning", "and", "deep", "learning", "."], "tags": ["O", "O", "O", "B-SKILL", "I-SKILL", "O", "B-SKILL", "I-SKILL", "O"]}
+{"tokens": ["Deployed", "microservices", "on", "Kubernetes", "with", "Helm", "charts", "."], "tags": ["O", "O", "O", "B-SKILL", "O", "B-SKILL", "O", "O"]}
+{"tokens": ["Proficient", "in", "Python", ",", "Go", "and", "Rust", "."], "tags": ["O", "O", "B-SKILL", "O", "B-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Wrote", "unit", "tests", "using", "Pytest", "and", "Jest", "."], "tags": ["O", "O", "O", "O", "B-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Automated", "CI/CD", "pipelines", "with", "GitHub", "Actions", "."], "tags": ["O", "B-SKILL", "O", "O", "B-SKILL", "I-SKILL", "O"]}
+{"tokens": ["Built", "dashboards", "in", "Tableau", "and", "Power", "BI", "."], "tags": ["O", "O", "O", "B-SKILL", "O", "B-SKILL", "I-SKILL", "O"]}
+{"tokens": ["Worked", "extensively", "with", "PostgreSQL", "and", "MongoDB", "."], "tags": ["O", "O", "O", "B-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Familiar", "with", "vector", "databases", "like", "Pinecone", "and", "Weaviate", "."], "tags": ["O", "O", "B-SKILL", "I-SKILL", "O", "B-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Implemented", "retrieval", "augmented", "generation", "using", "LangChain", "."], "tags": ["O", "B-SKILL", "I-SKILL", "I-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Comfortable", "with", "Docker", "Compose", "and", "Terraform", "."], "tags": ["O", "O", "B-SKILL", "I-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Led", "A/B", "testing", "experiments", "using", "Optimizely", "."], "tags": ["O", "B-SKILL", "I-SKILL", "O", "O", "B-SKILL", "O"]}
+{"tokens": ["Skilled", "in", "natural", "language", "processing", "and", "computer", "vision", "."], "tags": ["O", "O", "B-SKILL", "I-SKILL", "I-SKILL", "O", "B-SKILL", "I-SKILL", "O"]}
+{"tokens": ["Built", "REST", "APIs", "with", "FastAPI", "and", "Flask", "."], "tags": ["O", "B-SKILL", "I-SKILL", "O", "B-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Managed", "infrastructure", "on", "AWS", "using", "CloudFormation", "."], "tags": ["O", "O", "O", "B-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Analyzed", "large", "datasets", "with", "Pandas", "and", "NumPy", "."], "tags": ["O", "O", "O", "O", "B-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Trained", "transformer", "models", "using", "PyTorch", "Lightning", "."], "tags": ["O", "O", "O", "O", "B-SKILL", "I-SKILL", "O"]}
+{"tokens": ["Set", "up", "monitoring", "with", "Prometheus", "and", "Grafana", "."], "tags": ["O", "O", "O", "O", "B-SKILL", "O", "B-SKILL", "O"]}
+{"tokens": ["Collaborated", "using", "Jira", "and", "Confluence", "for", "agile", "sprints", "."], "tags": ["O", "O", "B-SKILL", "O", "B-SKILL", "O", "B-SKILL", "O", "O"]}

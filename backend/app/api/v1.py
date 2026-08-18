@@ -20,12 +20,16 @@ from app.models.schemas import (
 )
 from app.services.ats_structure_checker import run_all_ats_structure_checks
 from app.services.content_quality_analyzer import analyze_content
-from app.services.matcher import compute_gap_report
-from app.services.recommendation_engine import merge_findings, top_fixes
+from app.services.matcher import _get_model as _get_embedding_model, compute_gap_report
+from app.services.recommendation_engine import (
+    generate_eligibility_recommendations,
+    merge_findings,
+    top_fixes,
+)
 from app.services.resume_parser import parse_resume
-from app.services.scoring_engine import apply_report_scores
+from app.services.scoring_engine import apply_report_scores, compute_eligibility
 from app.services.section_detector import run_all_section_checks
-from app.services.skill_extractor import extract_skills
+from app.services.skill_extractor import _get_nlp as _get_spacy, extract_skills
 from app.utils.logging import get_logger
 from app.utils.redis_cache import (
     cache_report_json,
@@ -47,10 +51,10 @@ def _extract_section_headers(text: str) -> list[str]:
     candidate section headers fed to the section detector's alias resolution."""
     headers: list[str] = []
     for line in text.splitlines():
-        stripped = line.strip()
+        stripped = line.strip().rstrip(":").strip()  # strip trailing colon first
         if not stripped or len(stripped) > 40:
             continue
-        if any(ch in stripped for ch in ".:,;!?•"):
+        if any(ch in stripped for ch in ".,;!?•"):  # colon removed from exclusion set
             continue
         if _SECTION_HEADER_LIKE.match(stripped):
             headers.append(stripped)
@@ -219,8 +223,38 @@ async def analyze_resume_endpoint(
         raw_text=resume_text[:20000],
     )
     apply_report_scores(report, gap=gap)
+
+    # ── Eligibility verdict (Phase 3) ──────────────────────────────────────
+    critical_count = sum(1 for f in ats.findings if f.severity == "critical")
+    report.eligibility = compute_eligibility(
+        overall_score=report.overall_score,
+        match=report.match_score,
+        critical_ats_findings=critical_count,
+    )
+
+    # ── Eligibility-tied recommendations (Phase 3) ─────────────────────────
+    if gap:
+        eligibility_recs = generate_eligibility_recommendations(gap)
+        if eligibility_recs:
+            report.recommendations = eligibility_recs
+
+    # ── Warnings: transparent degradation (Phase 2) ────────────────────────
+    warnings: list[str] = []
+    if _get_spacy() is None:
+        warnings.append(
+            "AI-based skill extraction unavailable — using keyword taxonomy only. "
+            "Some skills may not be detected."
+        )
+    if _get_embedding_model() is None:
+        warnings.append(
+            "Semantic skill matching unavailable — using exact-name matching only, "
+            "which may miss synonyms."
+        )
+    report.warnings = warnings
+
     report.summary = build_summary(report)
 
+    # ── Cache (best-effort, never block the response) ──────────────────────
     try:
         cache_report_json(report.model_dump_json(), session_id=session_id)
     except ValueError as exc:

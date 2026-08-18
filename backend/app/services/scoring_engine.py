@@ -12,9 +12,12 @@ Error contract: pure functions — no I/O, never raise.
 """
 from __future__ import annotations
 
+import math
+
 from app.models.schemas import (
     AtScore,
     ContentScore,
+    EligibilityResult,
     Finding,
     GapReport,
     MatchScore,
@@ -171,3 +174,66 @@ def ats_from_findings(findings: list[Finding], format: str = "pdf") -> AtScore:
     """Builds an AtScore object from a flat finding list."""
     score, _breakdown = score_ats(findings, format=format)
     return AtScore(score=score, findings=findings, format=format)
+
+
+# ── Eligibility engine (Phase 3) ─────────────────────────────────────────────
+
+ELIGIBILITY_BANDS = [
+    (85, "strong_fit", "Strong fit — apply with confidence"),
+    (70, "good_fit", "Good fit — a few gaps to close before applying"),
+    (55, "moderate_fit", "Moderate fit — meaningful gaps, worth addressing first"),
+    (0, "weak_fit", "Weak fit — significant reskilling needed for this role"),
+]
+
+
+def _score_to_probability(overall_score: float, critical_ats_findings: int) -> float:
+    """A calibrated 'probability of passing initial screening' estimate.
+
+    NOT a claim of interview/offer probability — those depend on market,
+    competition, and recruiter factors this tool cannot see. Logistic squashing
+    keeps the estimate bounded and avoids false precision at the extremes.
+    """
+    x = (overall_score - 60) / 12  # centered around the pass line
+    p = 1 / (1 + math.exp(-x))
+    penalty = min(0.25, critical_ats_findings * 0.08)
+    return round(max(0.02, min(0.97, p - penalty)) * 100, 1)
+
+
+def compute_eligibility(
+    overall_score: float,
+    match: MatchScore | None,
+    critical_ats_findings: int,
+) -> EligibilityResult:
+    """Turns the overall score + hard gates into an eligibility verdict.
+
+    Two things can override a numerically-decent score:
+    - Any *critical* ATS finding (e.g. unparseable file, no skills section)
+      caps the band at 'moderate_fit' even if the number is high, because a
+      parser that can't read the resume will never surface it to a recruiter.
+    - If a JD was provided and match_score < 40, cap at 'weak_fit' — content
+      and formatting can't compensate for a fundamental skill mismatch.
+    """
+    verdict_key = "weak_fit"
+    verdict_label = ELIGIBILITY_BANDS[-1][2]
+
+    for threshold, key, label in ELIGIBILITY_BANDS:
+        if overall_score >= threshold:
+            verdict_key, verdict_label = key, label
+            break
+
+    # Hard gates (never let bad fundamentals hide behind a decent average)
+    downgraded = False
+    if critical_ats_findings > 0 and verdict_key in ("strong_fit", "good_fit"):
+        verdict_key, verdict_label = "moderate_fit", ELIGIBILITY_BANDS[2][2]
+        downgraded = True
+    if match is not None and match.score < 40 and verdict_key != "weak_fit":
+        verdict_key, verdict_label = "weak_fit", ELIGIBILITY_BANDS[-1][2]
+        downgraded = True
+
+    return EligibilityResult(
+        score=overall_score,
+        band=verdict_key,
+        label=verdict_label,
+        downgraded_by_hard_gate=downgraded,
+        probability_estimate=_score_to_probability(overall_score, critical_ats_findings),
+    )

@@ -46,6 +46,15 @@ export interface RecommendedSkill {
   skill: string;
   importance: number;
   resources: string[];
+  estimated_score_impact: string | null;
+}
+
+export interface EligibilityResult {
+  score: number;
+  band: string;
+  label: string;
+  downgraded_by_hard_gate: boolean;
+  probability_estimate: number;
 }
 
 export interface ScoreBreakdown {
@@ -82,6 +91,8 @@ export interface ResumeIntelligenceReport {
   recommendations: RecommendedSkill[];
   summary: string;
   raw_text: string;
+  eligibility: EligibilityResult | null;
+  warnings: string[];
 }
 
 export interface ExtractedSkills {

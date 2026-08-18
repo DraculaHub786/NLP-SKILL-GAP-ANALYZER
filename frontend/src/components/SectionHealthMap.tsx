@@ -15,12 +15,12 @@ const SECTION_LABELS: Record<string, string> = {
 
 function statusConfig(status: string | undefined) {
   if (status === "present") {
-    return { dot: "bg-green-500", label: "Present", icon: "✓" };
+    return { dot: "bg-status-success", label: "Present", icon: "✓", text: "text-status-success" };
   }
   if (status === "missing") {
-    return { dot: "bg-red-500", label: "Missing", icon: "✗" };
+    return { dot: "bg-status-critical", label: "Missing", icon: "✗", text: "text-status-critical" };
   }
-  return { dot: "bg-gray-300 dark:bg-gray-600", label: "Not detected", icon: "?" };
+  return { dot: "bg-ink-muted", label: "Not detected", icon: "?", text: "text-ink-muted" };
 }
 
 export function SectionHealthMap({ sectionSummary }: SectionHealthMapProps) {
@@ -29,8 +29,8 @@ export function SectionHealthMap({ sectionSummary }: SectionHealthMapProps) {
 
   return (
     <section className="mb-10" aria-label="Section health">
-      <h2 className="font-semibold mb-2">📑 Required sections</h2>
-      <p className="text-xs text-gray-500 mb-4">
+      <h2 className="text-lg font-semibold tracking-tight mb-2">📑 Required sections</h2>
+      <p className="text-xs text-ink-muted mb-4">
         {presentCount} of {sections.length} present
       </p>
       <ul className="grid sm:grid-cols-2 gap-2">
@@ -43,19 +43,11 @@ export function SectionHealthMap({ sectionSummary }: SectionHealthMapProps) {
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-2"
+              className="flex items-center gap-3 rounded-xl2 bg-surface-card dark:bg-surface-darkCard shadow-soft px-3 py-2.5"
             >
               <span className={`shrink-0 w-2 h-2 rounded-full ${config.dot}`} />
-              <span className="text-sm flex-1">{SECTION_LABELS[key]}</span>
-              <span
-                className={`text-xs font-medium ${
-                  config.dot.includes("green")
-                    ? "text-green-600 dark:text-green-400"
-                    : config.dot.includes("red")
-                      ? "text-red-600 dark:text-red-400"
-                      : "text-gray-400"
-                }`}
-              >
+              <span className="text-sm flex-1 text-ink-primary dark:text-ink-onDark">{SECTION_LABELS[key]}</span>
+              <span className={`text-xs font-medium ${config.text}`}>
                 {config.icon} {config.label}
               </span>
             </motion.li>

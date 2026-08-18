@@ -328,9 +328,19 @@ def detect_duplicate_sections(
 
 # ── 5. Contact-info extraction & validation ─────────────────────────────────────
 
-_EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+_EMAIL_REGEX = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 _PHONE_REGEX = re.compile(r"(\+\d{1,3}[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}")
 _LINKEDIN_REGEX = re.compile(r"linkedin\.com/in/[\w-]+")
+
+
+_CITY_LINE = re.compile(r"^([A-Za-z][A-Za-z ]{1,30}),\s*([A-Za-z]{2,})\s*$", re.MULTILINE)
+
+
+def has_contact_block(text: str, lines_to_scan: int = 12) -> bool:
+    """A resume is considered to have contact info if an email OR phone
+    appears anywhere in the first N lines — header optional."""
+    head = "\n".join(text.splitlines()[:lines_to_scan])
+    return bool(_EMAIL_REGEX.search(head) or _PHONE_REGEX.search(head))
 
 
 def extract_contact_info(
@@ -362,9 +372,10 @@ def extract_contact_info(
     if linkedin_match:
         contact["linkedin"] = linkedin_match.group(0)
 
-    # Try to extract city/region (typically formatted as "City, State" or "City, Country")
-    city_pattern = re.compile(r"([A-Za-z\s]+),\s*([A-Za-z]{2,})$")
-    city_match = city_pattern.search(text)
+    # Extract city/region from the first ~12 lines (header block) only,
+    # using MULTILINE mode so ^ and $ match per-line.
+    head = "\n".join(text.splitlines()[:12])
+    city_match = _CITY_LINE.search(head)
     if city_match:
         contact["city"] = city_match.group(1).strip()
 
@@ -455,6 +466,12 @@ def run_all_section_checks(
     """
     if classified is None:
         classified = classify_sections(raw_headers)
+
+    # Fix #5: If no literal "Contact" header was found but contact info (email/phone)
+    # exists in the first N lines of the resume, treat contact as present to avoid
+    # false critical findings on resumes that don't use a "Contact:" header.
+    if classified.get("contact") is None and has_contact_block(extract_contact_from_text):
+        classified["contact"] = "(detected from content — no explicit header)"
 
     missing = detect_missing_sections(classified, profile_level=profile_level)
     ordering = detect_section_ordering(classified, profile_level=profile_level)

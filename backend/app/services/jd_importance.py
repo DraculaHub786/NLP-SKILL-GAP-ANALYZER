@@ -24,6 +24,10 @@ _NICE_HAVE_HEADERS = re.compile(
     re.IGNORECASE,
 )
 
+# Fix #8: Nice-to-have sections get a genuinely lower weight than the 1.0
+# baseline, so must-have vs nice-to-have skills are actually differentiated.
+_NICE_TO_HAVE_WEIGHT = 0.7
+
 
 def _mention_pattern(skill: str) -> re.Pattern:
     """Word-boundary pattern for a skill so 'Go' doesn't match 'MongoDB'."""
@@ -50,7 +54,7 @@ def compute_importance(jd_text: str, jd_skills: list[str]) -> dict[str, float]:
         if _MUST_HAVE_HEADERS.search(line):
             boost = 1.5
         elif _NICE_HAVE_HEADERS.search(line):
-            boost = 1.0
+            boost = _NICE_TO_HAVE_WEIGHT
         boosts_by_line.append(boost)
 
     weighted_mentions: dict[str, float] = {s: 0.0 for s in jd_skills}

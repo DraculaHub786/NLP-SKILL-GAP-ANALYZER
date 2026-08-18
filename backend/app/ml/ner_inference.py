@@ -9,10 +9,15 @@ Heavy deps (torch, transformers) are imported lazily inside _lazy_load so this
 module — and therefore the whole API — can boot and be tested without the
 model stack installed.
 """
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
 _MODEL_DIR = Path(__file__).parent / "model_artifacts"
+
+# Tokenize to match training data style: words vs. punctuation as separate tokens.
+# Training data splits "React, TypeScript" into ["React", ",", "TypeScript"].
+_TOKEN_RE = re.compile(r"\w+|[^\w\s]")
 
 _tokenizer = None
 _model = None
@@ -54,7 +59,9 @@ def extract_skills_ner(text: str, min_confidence: float = 0.6) -> list[NerSkillS
 
     import torch
 
-    tokens = text.split()
+    # Fix #3: Use punctuation-aware tokenization matching training data style,
+    # not plain whitespace split. Training data has punctuation as separate tokens.
+    tokens = _TOKEN_RE.findall(text)
     if not tokens:
         return []
 

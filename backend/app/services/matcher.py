@@ -66,9 +66,9 @@ def compute_gap_report(
     jd_emb = None
     if model is not None:
         resume_emb = (
-            model.encode(resume_skills, convert_to_tensor=True) if resume_skills else None
+            model.encode(resume_skills, convert_to_tensor=True, normalize_embeddings=True) if resume_skills else None
         )
-        jd_emb = model.encode(jd_skills, convert_to_tensor=True)
+        jd_emb = model.encode(jd_skills, convert_to_tensor=True, normalize_embeddings=True)
 
     matched: list[SkillMatch] = []
     missing: list[str] = []

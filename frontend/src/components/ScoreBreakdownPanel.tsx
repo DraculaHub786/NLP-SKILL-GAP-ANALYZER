@@ -10,9 +10,10 @@ interface ScoreBreakdownPanelProps {
 }
 
 function subScoreColor(score: number): string {
-  if (score >= 80) return "#1E8E3E"; // success green
-  if (score >= 60) return "#F9AB00"; // warning amber
-  return "#D93025"; // danger red
+  if (score >= 80) return "#2FAE6B";
+  if (score >= 60) return "#FF7A29";
+  if (score >= 40) return "#D9A93C";
+  return "#E0473E";
 }
 
 export function ScoreBreakdownPanel({ overall, ats, content, match }: ScoreBreakdownPanelProps) {
@@ -45,7 +46,7 @@ export function ScoreBreakdownPanel({ overall, ats, content, match }: ScoreBreak
     <section className="mb-10" aria-label="Score breakdown">
       <div className="flex flex-col items-center mb-8">
         <ScoreRing score={overall} />
-        <p className="mt-2 text-gray-500">Overall Resume Score</p>
+        <p className="mt-2 text-ink-secondary text-sm">Overall Resume Score</p>
       </div>
 
       <div className={`grid gap-4 ${match ? "sm:grid-cols-3" : "sm:grid-cols-2"} max-w-2xl mx-auto`}>
@@ -55,14 +56,24 @@ export function ScoreBreakdownPanel({ overall, ats, content, match }: ScoreBreak
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 + i * 0.1 }}
-            className="rounded-2xl border border-gray-200 dark:border-gray-700 p-5 text-center"
+            className="rounded-xl2 bg-surface-card dark:bg-surface-darkCard shadow-soft hover:shadow-liftHover transition-shadow p-5 text-center"
           >
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{sub.label}</p>
-            <p className="text-3xl font-semibold mt-2" style={{ color: subScoreColor(sub.score) }}>
+            <p className="text-sm font-medium text-ink-secondary dark:text-ink-onDark">{sub.label}</p>
+            <p className="text-3xl font-semibold font-tabular-nums mt-2" style={{ color: subScoreColor(sub.score) }}>
               {Math.round(sub.score)}
-              <span className="text-base text-gray-400">/100</span>
+              <span className="text-base text-ink-muted">/100</span>
             </p>
-            <p className="text-xs text-gray-500 mt-2">{sub.detail}</p>
+            {/* Accent bar showing contribution */}
+            <div className="mt-3 h-1.5 rounded-full bg-surface-sunken dark:bg-surface-dark overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ backgroundColor: subScoreColor(sub.score) }}
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(100, sub.score)}%` }}
+                transition={{ delay: 0.3 + i * 0.1, duration: 0.6, ease: "easeOut" }}
+              />
+            </div>
+            <p className="text-xs text-ink-muted mt-2">{sub.detail}</p>
           </motion.div>
         ))}
       </div>

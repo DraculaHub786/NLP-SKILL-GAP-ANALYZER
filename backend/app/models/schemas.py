@@ -50,6 +50,11 @@ class Recommendation(BaseModel):
     skill: str
     importance: float = Field(default=1.0, ge=0.0)
     resources: list[str] = Field(default_factory=list)
+    estimated_score_impact: str | None = Field(
+        default=None,
+        description="Human-readable estimate of how much adding this skill would "
+        "move the overall score, e.g. '+3.2 pts to overall score if added credibly'.",
+    )
 
 
 # ── Legacy skill-gap report (backward compatible) ─────────────────────────────
@@ -86,6 +91,24 @@ class MatchScore(BaseModel):
     score: float = Field(ge=0.0, le=100.0)
     matched_count: int = Field(default=0, ge=0)
     missing_count: int = Field(default=0, ge=0)
+
+
+class EligibilityResult(BaseModel):
+    """Eligibility verdict: turns the overall score + hard gates into a
+    human-readable band, probability estimate, and override flag."""
+    score: float = Field(ge=0.0, le=100.0)
+    band: str  # "strong_fit", "good_fit", "moderate_fit", "weak_fit"
+    label: str  # human-readable description of the band
+    downgraded_by_hard_gate: bool = Field(
+        default=False,
+        description="True when the band was capped lower than the numeric score "
+        "suggests, due to critical ATS failures or very low match score.",
+    )
+    probability_estimate: float = Field(
+        ge=0.0, le=100.0,
+        description="Estimated screening-pass likelihood (0–100). "
+        "NOT a claim of interview/offer probability.",
+    )
 
 
 # A single finding/flag from any of the three engines
@@ -138,6 +161,19 @@ class ResumeIntelligenceReport(BaseModel):
     # Extracted plain text, returned to the browser for the "what the parser
     # sees" preview. Never persisted server-side — matches the privacy model.
     raw_text: str = ""
+    # Eligibility verdict (Phase 2–3): band, probability, hard-gate flag.
+    eligibility: EligibilityResult | None = Field(
+        default=None,
+        description="Eligibility verdict computed from the overall score + hard gates. "
+        "Null only for legacy /analyze calls.",
+    )
+    # Transparent degradation warnings (Phase 2): surfaced to the user so they
+    # know when a score was computed in degraded mode.
+    warnings: list[str] = Field(
+        default_factory=list,
+        description="Non-blocking warnings, e.g. 'Semantic matching unavailable — "
+        "using exact-name matching only.' Empty when all engines ran at full capacity.",
+    )
 
 
 def build_summary(report: "ResumeIntelligenceReport") -> str:

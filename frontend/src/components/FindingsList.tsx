@@ -12,11 +12,18 @@ const CATEGORY_LABELS: Record<FindingCategory, string> = {
   match: "JD Match",
 };
 
-const SEVERITY_STYLES: Record<FindingSeverity, { badge: string; border: string }> = {
-  critical: { badge: "bg-red-500 text-white", border: "border-red-300 dark:border-red-800" },
-  major: { badge: "bg-orange-500 text-white", border: "border-orange-300 dark:border-orange-800" },
-  minor: { badge: "bg-amber-500 text-white", border: "border-amber-300 dark:border-amber-800" },
-  info: { badge: "bg-gray-400 text-white", border: "border-gray-300 dark:border-gray-700" },
+const SEVERITY_DOT: Record<FindingSeverity, string> = {
+  critical: "bg-status-critical",
+  major: "bg-status-major",
+  minor: "bg-status-minor",
+  info: "bg-ink-muted",
+};
+
+const SEVERITY_BORDER: Record<FindingSeverity, string> = {
+  critical: "border-status-critical/30",
+  major: "border-status-major/30",
+  minor: "border-status-minor/30",
+  info: "border-ink-muted/30",
 };
 
 const SEVERITY_ORDER: FindingSeverity[] = ["critical", "major", "minor", "info"];
@@ -40,17 +47,17 @@ export function FindingsList({ findings }: FindingsListProps) {
 
   return (
     <section className="mb-10" aria-label="Detailed findings">
-      <h2 className="font-semibold mb-3">📋 Detailed findings</h2>
+      <h2 className="text-lg font-semibold tracking-tight mb-3">📋 Detailed findings</h2>
 
       <div className="flex flex-wrap gap-2 mb-4">
         {categories.map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-3 py-1 rounded-full text-sm border transition ${
+            className={`px-3 py-1.5 rounded-xl2 text-sm font-medium transition active:scale-[0.98] ${
               activeCategory === cat
-                ? "bg-accent text-white border-accent"
-                : "border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
+                ? "bg-accent text-white shadow-soft"
+                : "bg-surface-card dark:bg-surface-darkCard text-ink-secondary dark:text-ink-onDark border border-surface-sunken dark:border-surface-darkCard hover:shadow-soft"
             }`}
           >
             {cat === "all" ? "All" : CATEGORY_LABELS[cat as FindingCategory]}
@@ -62,10 +69,10 @@ export function FindingsList({ findings }: FindingsListProps) {
           <button
             key={sev}
             onClick={() => setActiveSeverity(sev)}
-            className={`px-3 py-1 rounded-full text-xs border transition ${
+            className={`px-3 py-1.5 rounded-xl2 text-xs font-medium transition active:scale-[0.98] ${
               activeSeverity === sev
-                ? "bg-gray-800 text-white dark:bg-gray-100 dark:text-gray-900 border-gray-800 dark:border-gray-100"
-                : "border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
+                ? "bg-ink-primary dark:bg-ink-onDark text-white dark:text-ink-primary shadow-soft"
+                : "bg-surface-card dark:bg-surface-darkCard text-ink-secondary dark:text-ink-onDark border border-surface-sunken dark:border-surface-darkCard hover:shadow-soft"
             }`}
           >
             {sev === "all" ? "All severities" : sev}
@@ -74,35 +81,34 @@ export function FindingsList({ findings }: FindingsListProps) {
       </div>
 
       {sorted.length === 0 ? (
-        <p className="text-sm text-gray-500">No findings match the current filters.</p>
+        <p className="text-sm text-ink-muted">No findings match the current filters.</p>
       ) : (
         <ul className="space-y-3" data-testid="findings-list">
           {sorted.map((finding, i) => {
             const key = `${finding.category}-${i}-${finding.message.slice(0, 20)}`;
             const isExpanded = expanded === key;
-            const styles = SEVERITY_STYLES[finding.severity];
+            const dotColor = SEVERITY_DOT[finding.severity];
+            const borderColor = SEVERITY_BORDER[finding.severity];
 
             return (
               <li key={key}>
                 <button
                   onClick={() => setExpanded(isExpanded ? null : key)}
-                  className={`w-full text-left rounded-2xl border p-4 transition ${styles.border} hover:bg-gray-50 dark:hover:bg-gray-900/40`}
+                  className={`w-full text-left rounded-xl2 bg-surface-card dark:bg-surface-darkCard shadow-soft hover:shadow-liftHover transition-shadow border ${borderColor} p-4`}
                   aria-expanded={isExpanded}
                 >
                   <div className="flex items-start gap-3">
-                    <span className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold ${styles.badge}`}>
-                      {finding.severity}
-                    </span>
+                    <span className={`shrink-0 w-2.5 h-2.5 rounded-full mt-1.5 ${dotColor}`} />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                      <p className="text-sm font-medium text-ink-primary dark:text-ink-onDark">
                         {finding.message}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-ink-muted mt-1">
                         {CATEGORY_LABELS[finding.category]}
                         {finding.section ? ` · ${finding.section}` : ""}
                       </p>
                     </div>
-                    <span className="shrink-0 text-gray-400">{isExpanded ? "−" : "+"}</span>
+                    <span className="shrink-0 text-ink-muted text-lg">{isExpanded ? "−" : "+"}</span>
                   </div>
 
                   <AnimatePresence>
@@ -113,22 +119,22 @@ export function FindingsList({ findings }: FindingsListProps) {
                         exit={{ opacity: 0, height: 0 }}
                         className="overflow-hidden"
                       >
-                        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 space-y-2 text-sm">
-                          <p className="text-gray-600 dark:text-gray-300">{finding.why_it_matters}</p>
-                          <p className="text-gray-800 dark:text-gray-100">
+                        <div className="mt-3 pt-3 border-t border-surface-sunken dark:border-surface-dark space-y-2 text-sm">
+                          <p className="text-ink-secondary dark:text-ink-onDark">{finding.why_it_matters}</p>
+                          <p className="text-ink-primary dark:text-ink-onDark">
                             <span className="font-medium">Fix: </span>
                             {finding.fix_suggestion}
                           </p>
                           {finding.example_before && (
-                            <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 border border-red-100 dark:border-red-900/40">
-                              <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-1">Before</p>
-                              <p className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{finding.example_before}</p>
+                            <div className="rounded-xl bg-status-critical/5 p-3 border border-status-critical/10">
+                              <p className="text-xs font-medium text-status-critical mb-1">Before</p>
+                              <p className="text-xs text-ink-secondary dark:text-ink-onDark whitespace-pre-wrap">{finding.example_before}</p>
                             </div>
                           )}
                           {finding.example_after && (
-                            <div className="rounded-lg bg-green-50 dark:bg-green-900/20 p-3 border border-green-100 dark:border-green-900/40">
-                              <p className="text-xs font-medium text-green-600 dark:text-green-400 mb-1">After</p>
-                              <p className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{finding.example_after}</p>
+                            <div className="rounded-xl bg-status-success/5 p-3 border border-status-success/10">
+                              <p className="text-xs font-medium text-status-success mb-1">After</p>
+                              <p className="text-xs text-ink-secondary dark:text-ink-onDark whitespace-pre-wrap">{finding.example_after}</p>
                             </div>
                           )}
                         </div>

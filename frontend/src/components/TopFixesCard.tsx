@@ -6,18 +6,18 @@ interface TopFixesCardProps {
 }
 
 const SEVERITY_DOT: Record<string, string> = {
-  critical: "bg-red-500",
-  major: "bg-orange-500",
-  minor: "bg-amber-500",
-  info: "bg-gray-400",
+  critical: "bg-status-critical",
+  major: "bg-status-major",
+  minor: "bg-status-minor",
+  info: "bg-ink-muted",
 };
 
 export function TopFixesCard({ fixes }: TopFixesCardProps) {
   if (!fixes.length) return null;
 
   return (
-    <section className="mb-10 rounded-2xl border-2 border-accent/40 bg-accent/5 p-5" aria-label="Top fixes">
-      <h2 className="font-semibold mb-4">⚡ Top fixes to make now</h2>
+    <section className="mb-10 rounded-xl2 border-2 border-accent/30 bg-accent-subtle/30 dark:bg-accent/5 p-5 shadow-soft" aria-label="Top fixes">
+      <h2 className="text-lg font-semibold tracking-tight mb-4">⚡ Top fixes to make now</h2>
       <ol className="space-y-3">
         {fixes.map((fix, i) => (
           <motion.li
@@ -31,11 +31,11 @@ export function TopFixesCard({ fixes }: TopFixesCardProps) {
               {i + 1}
             </span>
             <div className="min-w-0">
-              <p className="flex items-center gap-2 text-sm font-medium text-gray-800 dark:text-gray-100">
-                <span className={`shrink-0 w-2 h-2 rounded-full ${SEVERITY_DOT[fix.severity] ?? "bg-gray-400"}`} />
+              <p className="flex items-center gap-2 text-sm font-medium text-ink-primary dark:text-ink-onDark">
+                <span className={`shrink-0 w-2 h-2 rounded-full ${SEVERITY_DOT[fix.severity] ?? "bg-ink-muted"}`} />
                 <span className="break-words">{fix.message}</span>
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-ink-muted mt-1">
                 {fix.fix_suggestion}
                 {fix.section ? ` (${fix.section})` : ""}
               </p>

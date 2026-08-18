@@ -4,11 +4,30 @@
 
 body {
   font-family: "Inter", "Google Sans", system-ui, sans-serif;
+  background-color: #F4F4F2;
+  color: #1C1C1E;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dark body {
+  background-color: #17181A;
+  color: #F2F2F0;
+}
+
+/* Typography refinements */
+h1, h2, h3 {
+  letter-spacing: -0.01em;
+}
+
+.font-tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *, *::before, *::after {
     animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
     transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

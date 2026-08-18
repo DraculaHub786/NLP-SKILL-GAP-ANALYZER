@@ -5,6 +5,7 @@ instead of leaking stack traces to clients.
 import time
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -47,6 +48,22 @@ async def log_request_details(request: Request, call_next):
         latency_ms=latency_ms,
     )
     return response
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Reformats Pydantic 422 errors into user-readable messages instead of
+    raw field-missing internals."""
+    errors = exc.errors()
+    if errors:
+        first = errors[0]
+        loc = first.get("loc", [])
+        msg = first.get("msg", "Invalid input")
+        field = loc[-1] if loc else "input"
+        detail = f"Please check your input: {field} — {msg}"
+    else:
+        detail = "Please check your input and try again."
+    return JSONResponse(status_code=422, content={"detail": detail})
 
 
 @app.exception_handler(Exception)

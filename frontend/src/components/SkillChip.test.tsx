@@ -9,9 +9,9 @@ describe("SkillChip", () => {
   });
 
   it.each([
-    ["matched", "bg-green-100"],
-    ["missing", "bg-amber-100"],
-    ["bonus", "bg-indigo-100"],
+    ["matched", "bg-status-success/10"],
+    ["missing", "bg-status-critical/10"],
+    ["bonus", "bg-accent-subtle"],
   ] as const)("renders the correct variant class for %s", (variant, expectedClass) => {
     render(<SkillChip label="Skill" variant={variant} />);
     expect(screen.getByText("Skill")).toHaveClass(expectedClass);

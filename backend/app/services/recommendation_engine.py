@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from collections import Counter
 
-from app.models.schemas import Finding
+from app.models.schemas import Finding, GapReport, Recommendation
 
 # Severity ranking: higher = more urgent.
 SEVERITY_RANK = {"critical": 4, "major": 3, "minor": 2, "info": 1}
@@ -138,3 +138,34 @@ def count_by_category(findings: list[Finding]) -> dict[str, int]:
         "content": counts.get("content", 0),
         "match": counts.get("match", 0),
     }
+
+
+def generate_eligibility_recommendations(
+    gap: GapReport, top_n: int = 5
+) -> list[Recommendation]:
+    """Prioritizes missing JD skills by (importance × how much closing it
+    would move match_score), not just importance alone — so recommendations
+    reflect actual scoring leverage.
+
+    Returns a list of Recommendation objects with `estimated_score_impact`
+    populated, showing the candidate exactly how much each missing skill
+    would move their overall score.
+    """
+    if not gap.missing or not gap.recommendations:
+        return []
+    total_weight = sum(r.importance for r in gap.recommendations) or 1.0
+    scored: list[tuple[float, Recommendation]] = []
+    for rec in gap.recommendations:
+        # 0.4 = match's default weight in overall score
+        score_delta = round((rec.importance / total_weight) * 100 * 0.4, 1)
+        scored.append((score_delta, rec))
+    scored.sort(key=lambda t: -t[0])
+    out: list[Recommendation] = []
+    for delta, rec in scored[:top_n]:
+        out.append(Recommendation(
+            skill=rec.skill,
+            importance=rec.importance,
+            resources=rec.resources,
+            estimated_score_impact=f"+{delta} pts to overall score if added credibly",
+        ))
+    return out

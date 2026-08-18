@@ -1,0 +1,28 @@
+{
+  "work experience": "experience",
+  "professional experience": "experience",
+  "employment history": "experience",
+  "work history": "experience",
+  "employment": "experience",
+
+  "education": "education",
+  "educational background": "education",
+  "academic background": "education",
+
+  "skills": "skills",
+  "core competencies": "skills",
+  "technical skills": "skills",
+  "key skills": "skills",
+
+  "certifications": "certifications",
+  "certifications and awards": "certifications",
+
+  "summary": "summary",
+  "objective": "summary",
+  "professional summary": "summary",
+
+  "contact": "contact",
+  "contact information": "contact",
+  "personal information": "contact",
+  "personal details": "contact"
+}

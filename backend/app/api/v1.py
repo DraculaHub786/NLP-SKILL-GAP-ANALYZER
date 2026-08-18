@@ -29,7 +29,7 @@ from app.services.recommendation_engine import (
 from app.services.resume_parser import parse_resume
 from app.services.scoring_engine import apply_report_scores, compute_eligibility
 from app.services.section_detector import run_all_section_checks
-from app.services.skill_extractor import _get_nlp as _get_spacy, extract_skills
+from app.services.skill_extractor import _get_nlp as _get_spacy, extract_skills, extract_skills_with_meta
 from app.utils.logging import get_logger
 from app.utils.redis_cache import (
     cache_report_json,
@@ -190,10 +190,11 @@ async def analyze_resume_endpoint(
     ats.findings += formatting["chrono_order"]
     ats.findings += formatting["bullet_consistency"]
 
-    # ── Content engine ──────────────────────────────────────────────────────
+    # ── Content engine (spaCy-aware when available) ────────────────────────
     content_score, content_findings = analyze_content(
         _extract_bullet_starts(resume_text),
         current_role_index=None,
+        nlp=_get_spacy(),
     )
 
     # ── Match engine (only when a JD is provided) ───────────────────────────

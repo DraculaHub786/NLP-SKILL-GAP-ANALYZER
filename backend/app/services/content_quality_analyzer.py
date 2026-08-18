@@ -32,6 +32,7 @@ WEAK_STARTERS = {
     "took part in", "contributed to", "supported",
 }
 
+# Legacy PASSIVE_HINTS kept as fallback when spaCy is unavailable.
 PASSIVE_HINTS = [
     " was ", " were ", " been ", " is ", " are ", " being ",
     " is built ", " was built ", " were built ", " was developed ",
@@ -123,12 +124,27 @@ class ContentChecker:
 
     # ── checks ───────────────────────────────────────────────────────────────
 
-    def weak_verb_findings(self) -> list[Finding]:
+    def weak_verb_findings(self, nlp=None) -> list[Finding]:
+        """Detects weak-verb bullet openers. When spaCy is available, uses
+        token.lemma_ for matching so 'architecting', 'architected', 'architects'
+        all correctly resolve against the curated STRONG_VERBS set."""
         findings: list[Finding] = []
         for idx, bullet in enumerate(self.bullets, start=1):
             weak = self._weak_start(bullet)
             if not weak:
                 continue
+            # If spaCy is available, check if the first word is actually a
+            # strong verb by lemma (catches inflected forms like 'architecting')
+            if nlp is not None:
+                doc = nlp(bullet)
+                first_lemma_is_strong = False
+                for tok in doc:
+                    if tok.is_space or tok.is_punct:
+                        continue
+                    first_lemma_is_strong = tok.lemma_.lower() in STRONG_VERBS
+                    break  # Only check the first meaningful token
+                if first_lemma_is_strong:
+                    continue  # Skip — this is actually a strong verb in inflected form
             first = self._first_word(bullet)
             family = self._weak_family(weak, first)
             suggestion = self._FAVORITE_FAMILY_VERBS.get(family) or self._STRONG_BY_FAMILY[family][0]
@@ -193,11 +209,20 @@ class ContentChecker:
             ))
         return findings, pct
 
-    def passive_voice_findings(self) -> list[Finding]:
+    def passive_voice_findings(self, nlp=None) -> list[Finding]:
+        """Detects passive voice using spaCy dependency parse when available,
+        falls back to substring heuristics when spaCy is unavailable."""
         findings: list[Finding] = []
         for idx, bullet in enumerate(self.bullets, start=1):
-            lowered = " " + bullet.lower() + " "
-            if any(hint in lowered for hint in PASSIVE_HINTS):
+            is_passive = False
+            if nlp is not None:
+                doc = nlp(bullet)
+                is_passive = any(tok.dep_ in ("auxpass", "nsubjpass") for tok in doc)
+            else:
+                lowered = " " + bullet.lower() + " "
+                is_passive = any(hint in lowered for hint in PASSIVE_HINTS)
+
+            if is_passive:
                 findings.append(Finding(
                     category="content",
                     severity="info",
@@ -210,37 +235,76 @@ class ContentChecker:
                 ))
         return findings
 
-    def tense_findings(self) -> list[Finding]:
+    def tense_findings(self, nlp=None) -> list[Finding]:
+        """Detects tense issues using spaCy morphological features when available
+        (Tense=Past/Pres on VERB tokens), falls back to regex word lists."""
         findings: list[Finding] = []
         if len(self.bullets) < 1:
             return findings
         for idx, bullet in enumerate(self.bullets, start=1):
-            lowered = bullet.lower()
-            if idx - 1 >= self.current_role_index:
-                # Current role → expect present tense. Past-tense verbs are suspect.
-                if _PAST_TENSE.search(lowered):
+            if nlp is not None:
+                # Use spaCy morphology for tense detection
+                doc = nlp(bullet)
+                has_past = False
+                has_present = False
+                for tok in doc:
+                    if tok.pos_ == "VERB" and "Tense" in tok.morph:
+                        tense_vals = tok.morph.get("Tense")
+                        if "Past" in tense_vals:
+                            has_past = True
+                        if "Pres" in tense_vals:
+                            has_present = True
+
+                if idx - 1 >= self.current_role_index:
+                    if has_past and not has_present:
+                        findings.append(Finding(
+                            category="content",
+                            severity="info",
+                            section=f"experience bullet {idx}",
+                            message=f"Bullet {idx} may use past tense in the current role.",
+                            why_it_matters="Current-role bullets should be present tense ('Leading', 'Building') while past roles use past tense ('Led', 'Built').",
+                            fix_suggestion="If this is your current role, use present tense.",
+                            example_before=bullet,
+                            example_after="Present tense version for a current role.",
+                        ))
+                else:
+                    if has_past and has_present:
+                        findings.append(Finding(
+                            category="content",
+                            severity="minor",
+                            section=f"experience bullet {idx}",
+                            message=f"Bullet {idx} mixes present and past tense.",
+                            why_it_matters="Mixed tense within one past-role bullet makes the timeline unclear.",
+                            fix_suggestion="Use past tense consistently for past roles.",
+                            example_before=bullet,
+                            example_after="Past-tense version with all verbs in past tense.",
+                        ))
+            else:
+                # Fallback: regex keyword lists
+                lowered = bullet.lower()
+                if idx - 1 >= self.current_role_index:
+                    if _PAST_TENSE.search(lowered):
+                        findings.append(Finding(
+                            category="content",
+                            severity="info",
+                            section=f"experience bullet {idx}",
+                            message=f"Bullet {idx} may use past tense in the current role.",
+                            why_it_matters="Current-role bullets should be present tense ('Leading', 'Building') while past roles use past tense ('Led', 'Built').",
+                            fix_suggestion="If this is your current role, use present tense.",
+                            example_before=bullet,
+                            example_after="Present tense version for a current role.",
+                        ))
+                elif _PRESENT_TENSE.search(lowered) and _PAST_TENSE.search(lowered):
                     findings.append(Finding(
                         category="content",
-                        severity="info",
+                        severity="minor",
                         section=f"experience bullet {idx}",
-                        message=f"Bullet {idx} may use past tense in the current role.",
-                        why_it_matters="Current-role bullets should be present tense ('Leading', 'Building') while past roles use past tense ('Led', 'Built'). Mixed tenses erode scannability.",
-                        fix_suggestion="If this is your current role, use present tense ('Lead', 'Build'). If it is a past role, ensure all bullets use past tense.",
+                        message=f"Bullet {idx} mixes present and past tense.",
+                        why_it_matters="Mixed tense within one past-role bullet makes the timeline unclear.",
+                        fix_suggestion="Use past tense consistently for past roles.",
                         example_before=bullet,
-                        example_after="Present tense version for a current role.",
+                        example_after="Past-tense version with all verbs in past tense.",
                     ))
-            # Past roles → check for present-tense verbs that indicate a mismatch
-            elif _PRESENT_TENSE.search(lowered) and _PAST_TENSE.search(lowered):
-                findings.append(Finding(
-                    category="content",
-                    severity="minor",
-                    section=f"experience bullet {idx}",
-                    message=f"Bullet {idx} mixes present and past tense.",
-                    why_it_matters="Mixed tense within one past-role bullet makes the timeline unclear to both ATS and human readers.",
-                    fix_suggestion="Use past tense consistently for past roles.",
-                    example_before=bullet,
-                    example_after="Past-tense version with all verbs in past tense.",
-                ))
         return findings
 
     def cliche_findings(self) -> list[Finding]:
@@ -444,18 +508,24 @@ _PRESENT_TENSE = re.compile(
 def analyze_content(
     bullets: list[str],
     current_role_index: int | None = None,
+    nlp=None,
 ) -> tuple[ContentScore, list[Finding]]:
     """Public entry point: analyze a list of resume bullets.
 
     Returns (ContentScore, findings) — the findings feed the unified report
     while the score carries the headline metrics.
+
+    When `nlp` is provided (a loaded spaCy pipeline), passive voice detection
+    uses dependency parsing and tense detection uses morphological features,
+    replacing the regex/substring fallbacks. Falls back gracefully to regex
+    when spaCy is unavailable.
     """
     checker = ContentChecker(bullets, current_role_index=current_role_index)
     findings = (
-        checker.weak_verb_findings()
+        checker.weak_verb_findings(nlp=nlp)
         + checker.quantification_findings()[0]
-        + checker.passive_voice_findings()
-        + checker.tense_findings()
+        + checker.passive_voice_findings(nlp=nlp)
+        + checker.tense_findings(nlp=nlp)
         + checker.cliche_findings()
         + checker.style_findings()
         + checker.bullet_length_findings()

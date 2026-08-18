@@ -14,11 +14,21 @@ import threading
 from functools import lru_cache
 from pathlib import Path
 
+from dataclasses import dataclass, field
+
 from app.core.config import settings
 from app.ml.ner_inference import NerSkillSpan, extract_skills_ner
 from app.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+@dataclass
+class ExtractionResult:
+    """Skills plus extraction-mode metadata for transparency."""
+    skills: list[str] = field(default_factory=list)
+    ner_active: bool = False
+    mode: str = "taxonomy_only"
 
 _TAXONOMY_PATH = Path(__file__).parent.parent / "ml" / "skills_taxonomy.json"
 
@@ -117,6 +127,14 @@ def match_taxonomy(text: str) -> set[str]:
     return found
 
 
+def _ner_model_loaded() -> bool:
+    """Checks whether the NER model is available without triggering a load."""
+    from app.ml.ner_inference import _lazy_load, _model as ner_model
+    _lazy_load()
+    from app.ml import ner_inference
+    return ner_inference._model is not None
+
+
 def extract_skills(text: str, min_ner_confidence: float = 0.6) -> list[str]:
     """Fuses taxonomy matches with NER predictions. Returns a sorted,
     de-duplicated list of canonical (or novel) skill names.
@@ -124,19 +142,39 @@ def extract_skills(text: str, min_ner_confidence: float = 0.6) -> list[str]:
     Never raises: an NER inference failure degrades to taxonomy-only results
     (with a warning log) rather than breaking the request.
     """
+    result = extract_skills_with_meta(text, min_ner_confidence=min_ner_confidence)
+    return result.skills
+
+
+def extract_skills_with_meta(
+    text: str, min_ner_confidence: float = 0.6
+) -> "ExtractionResult":
+    """Returns skills plus extraction metadata (mode, ner_active flag).
+
+    The `mode` field tells the caller whether the full hybrid pipeline ran
+    or only the taxonomy fallback — so the API can surface this as a
+    warning when the user gets a degraded scan.
+    """
     if not text or not text.strip():
-        return []
+        return ExtractionResult(skills=[], ner_active=False, mode="taxonomy_only")
 
     taxonomy_found = match_taxonomy(text)
 
+    ner_available = _ner_model_loaded()
     ner_spans: list[NerSkillSpan] = []
-    try:
-        ner_spans = extract_skills_ner(text, min_confidence=min_ner_confidence)
-    except Exception as exc:
-        # NER is best-effort; a model-inference hiccup must never 500 the API.
-        logger.warning("ner_inference_failed_degrading_to_taxonomy", error=str(exc))
+    if ner_available:
+        try:
+            ner_spans = extract_skills_ner(text, min_confidence=min_ner_confidence)
+        except Exception as exc:
+            # NER is best-effort; a model-inference hiccup must never 500 the API.
+            logger.warning("ner_inference_failed_degrading_to_taxonomy", error=str(exc))
+            ner_available = False
 
     taxonomy_lower = {s.lower() for s in taxonomy_found}
     novel = {span.text for span in ner_spans if span.text.lower() not in taxonomy_lower}
 
-    return sorted(taxonomy_found | novel)
+    return ExtractionResult(
+        skills=sorted(taxonomy_found | novel),
+        ner_active=ner_available,
+        mode="hybrid" if ner_available else "taxonomy_only",
+    )

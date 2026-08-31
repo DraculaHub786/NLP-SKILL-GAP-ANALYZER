@@ -67,6 +67,36 @@ docs/       Master plan
 - Analysis results are cached anonymously in Redis with a 48h TTL.
 - The browser mirrors results in IndexedDB with the same 48h TTL, swept on every app load.
 
+## ML/NLP capabilities
+
+Beyond the three scoring engines, the system now includes a multi-engine
+NLP pipeline (see `docs/MASTER_PLAN.md`):
+
+- **Skill Ontology** (`backend/app/skills/`) — a ~450-skill taxonomy plus a
+  JSON adjacency graph (`requires` / `related` / `advanced_of` / `category`)
+  enabling implicit-gap inference (e.g. React ⇒ JavaScript).
+- **Semantic Matching** (`backend/app/nlp/semantic_matcher.py`) — hybrid
+  lexical + sentence-transformer embeddings + ontology boost, combined via
+  configurable weights (`LEXICAL_WEIGHT` / `SEMANTIC_WEIGHT` / `ONTOLOGY_WEIGHT`).
+- **Proficiency Estimation** (`backend/app/nlp/proficiency.py`) — linguistic
+  cue-based leveling (Beginner / Intermediate / Advanced / Expert) with
+  per-skill evidence for the explainability layer.
+- **Gap Engine** (`backend/app/analysis/gap_engine.py`) — severity-bucketed
+  gap scores (Critical / High / Medium / Low) as a function of required vs.
+  candidate proficiency, importance, and market demand.
+- **Priority Engine** (`backend/app/analysis/priority_engine.py`) — re-ranks
+  gaps by market demand into a "learn this first" list (`top_priority_skills`).
+- **Fine-tuned Skill-NER** (`backend/app/ml/model_artifacts/`) — a
+  `distilbert-base-uncased` token-classification model trained on ~3.1k
+  distant-supervision + seed examples (BIO tags), fused with taxonomy
+  matching to recall skills outside the taxonomy.
+- **Threshold Calibration** (`backend/scripts/calibrate_threshold.py`) —
+  `skill_match_threshold` is calibrated (0.57) on a labeled skill-pair set
+  via an F1 sweep, rather than guessed.
+- **Evaluation Harness** (`backend/app/eval/` + `backend/scripts/evaluate_pipeline.py`) —
+  precision/recall/F1 for skill extraction, a lexical-vs-semantic-vs-hybrid
+  matching comparison, and recommendation metrics (Precision@K, NDCG@K, MRR).
+
 ## Score weighting
 
 Sub-scores are weighted independently and configured via JSON, not hardcoded.

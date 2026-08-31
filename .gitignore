@@ -15,6 +15,10 @@ venv/
 # ML artifacts (binary, regenerated via train_ner.py — never commit)
 backend/app/ml/model_artifacts/
 
+# Generated NER training data (regenerable via generate_distant_supervision.py — never commit)
+backend/app/ml/data/skill_ner_distant.jsonl
+backend/app/ml/data/skill_ner_train.jsonl
+
 # Node
 node_modules/
 dist/

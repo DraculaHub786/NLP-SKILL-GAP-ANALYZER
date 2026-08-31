@@ -1,0 +1,67 @@
+{"resume_skill": "Python", "jd_skill": "Python", "is_match": true}
+{"resume_skill": "JavaScript", "jd_skill": "JavaScript", "is_match": true}
+{"resume_skill": "Data Visualization", "jd_skill": "Dashboarding", "is_match": true}
+{"resume_skill": "Machine Learning", "jd_skill": "ML", "is_match": true}
+{"resume_skill": "Natural Language Processing", "jd_skill": "NLP", "is_match": true}
+{"resume_skill": "React", "jd_skill": "React.js", "is_match": true}
+{"resume_skill": "Node.js", "jd_skill": "Node", "is_match": true}
+{"resume_skill": "PostgreSQL", "jd_skill": "Postgres", "is_match": true}
+{"resume_skill": "Docker", "jd_skill": "Containerization", "is_match": true}
+{"resume_skill": "Kubernetes", "jd_skill": "K8s", "is_match": true}
+{"resume_skill": "TypeScript", "jd_skill": "Typed JavaScript", "is_match": true}
+{"resume_skill": "Amazon Web Services", "jd_skill": "AWS", "is_match": true}
+{"resume_skill": "Microsoft Azure", "jd_skill": "Azure", "is_match": true}
+{"resume_skill": "Google Cloud Platform", "jd_skill": "GCP", "is_match": true}
+{"resume_skill": "CI/CD", "jd_skill": "Continuous Integration", "is_match": true}
+{"resume_skill": "REST API", "jd_skill": "RESTful API", "is_match": true}
+{"resume_skill": "C#", "jd_skill": "C Sharp", "is_match": true}
+{"resume_skill": "C++", "jd_skill": "C Plus Plus", "is_match": true}
+{"resume_skill": "Vue.js", "jd_skill": "Vue", "is_match": true}
+{"resume_skill": "Big Data", "jd_skill": "Large Scale Data Processing", "is_match": true}
+{"resume_skill": "Deep Learning", "jd_skill": "Neural Networks", "is_match": true}
+{"resume_skill": "Git", "jd_skill": "Version Control", "is_match": true}
+{"resume_skill": "SQL", "jd_skill": "Structured Query Language", "is_match": true}
+{"resume_skill": "MongoDB", "jd_skill": "NoSQL", "is_match": true}
+{"resume_skill": "Redis", "jd_skill": "Caching", "is_match": true}
+{"resume_skill": "GraphQL", "jd_skill": "API Query Language", "is_match": true}
+{"resume_skill": "Terraform", "jd_skill": "Infrastructure as Code", "is_match": true}
+{"resume_skill": "Agile", "jd_skill": "Scrum", "is_match": true}
+{"resume_skill": "Object-Oriented Programming", "jd_skill": "OOP", "is_match": true}
+{"resume_skill": "Unit Testing", "jd_skill": "Test-Driven Development", "is_match": true}
+{"resume_skill": "Microservices", "jd_skill": "Microservice Architecture", "is_match": true}
+{"resume_skill": "Flask", "jd_skill": "Flask Framework", "is_match": true}
+{"resume_skill": "Django", "jd_skill": "Django REST Framework", "is_match": true}
+{"resume_skill": "Spring Boot", "jd_skill": "Spring", "is_match": true}
+{"resume_skill": "Prompt Engineering", "jd_skill": "LLM Prompting", "is_match": true}
+{"resume_skill": "RAG", "jd_skill": "Retrieval Augmented Generation", "is_match": true}
+{"resume_skill": "Java", "jd_skill": "JavaScript", "is_match": false}
+{"resume_skill": "JavaScript", "jd_skill": "Java", "is_match": false}
+{"resume_skill": "React", "jd_skill": "Vue.js", "is_match": false}
+{"resume_skill": "Python", "jd_skill": "PyTorch", "is_match": false}
+{"resume_skill": "SQL", "jd_skill": "GraphQL", "is_match": false}
+{"resume_skill": "Docker", "jd_skill": "Kubernetes", "is_match": false}
+{"resume_skill": "AWS", "jd_skill": "Azure", "is_match": false}
+{"resume_skill": "Go", "jd_skill": "Rust", "is_match": false}
+{"resume_skill": "TensorFlow", "jd_skill": "PyTorch", "is_match": false}
+{"resume_skill": "MySQL", "jd_skill": "PostgreSQL", "is_match": false}
+{"resume_skill": "CSS", "jd_skill": "Sass", "is_match": false}
+{"resume_skill": "Angular", "jd_skill": "React", "is_match": false}
+{"resume_skill": "MongoDB", "jd_skill": "Redis", "is_match": false}
+{"resume_skill": "Linux", "jd_skill": "Docker", "is_match": false}
+{"resume_skill": "C", "jd_skill": "C++", "is_match": false}
+{"resume_skill": "Swift", "jd_skill": "Kotlin", "is_match": false}
+{"resume_skill": "Ruby", "jd_skill": "Python", "is_match": false}
+{"resume_skill": "PHP", "jd_skill": "Python", "is_match": false}
+{"resume_skill": "Excel", "jd_skill": "Tableau", "is_match": false}
+{"resume_skill": "Figma", "jd_skill": "Photoshop", "is_match": false}
+{"resume_skill": "Project Management", "jd_skill": "Product Management", "is_match": false}
+{"resume_skill": "Data Analysis", "jd_skill": "Data Engineering", "is_match": false}
+{"resume_skill": "Machine Learning", "jd_skill": "Data Entry", "is_match": false}
+{"resume_skill": "REST API", "jd_skill": "SOAP", "is_match": false}
+{"resume_skill": "Blockchain", "jd_skill": "Database", "is_match": false}
+{"resume_skill": "iOS Development", "jd_skill": "Android Development", "is_match": false}
+{"resume_skill": "Frontend Development", "jd_skill": "Backend Development", "is_match": false}
+{"resume_skill": "DevOps", "jd_skill": "Design", "is_match": false}
+{"resume_skill": "Statistics", "jd_skill": "Accounting", "is_match": false}
+{"resume_skill": "Cybersecurity", "jd_skill": "Web Development", "is_match": false}
+{"resume_skill": "Robotics", "jd_skill": "Game Development", "is_match": false}

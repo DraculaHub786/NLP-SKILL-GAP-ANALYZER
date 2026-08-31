@@ -20,7 +20,9 @@ class Settings(BaseSettings):
 
     # NLP
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
-    skill_match_threshold: float = 0.78
+    # Calibrated on tests/fixtures/skill_match_pairs.jsonl (see scripts/calibrate_threshold.py):
+    # best F1=0.712 at threshold 0.57 (was 0.78 with F1=0.391).
+    skill_match_threshold: float = 0.57
 
     # Rate limiting (per-IP, per-endpoint group)
     rate_limit_enabled: bool = True

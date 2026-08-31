@@ -68,12 +68,19 @@ def test_extract_skills_dedupes_and_sorts():
 
 
 def test_no_spacy_degrades_gracefully():
-    """If spaCy can't be loaded, extraction must return [] — never raise."""
+    """If the full NLP stack (spaCy taxonomy matcher AND NER model) is
+    unavailable, extraction must return [] — never raise.
+
+    With a trained NER model present, fixing spaCy off alone is not enough to
+    force a degraded result (NER is a legitimate second extraction path), so
+    this test disables both signals to assert the true degradation invariant.
+    """
     original = skill_extractor._nlp
     skill_extractor._nlp = None  # force reload attempt
     try:
         with pytest.MonkeyPatch.context() as mp:
             mp.setattr(skill_extractor, "_get_nlp", lambda: None)
+            mp.setattr(skill_extractor, "_ner_model_loaded", lambda: False)
             assert skill_extractor.match_taxonomy("Python and React") == set()
             assert skill_extractor.extract_skills("Python and React") == []
     finally:

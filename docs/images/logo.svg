@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1C1C1E"/>
+      <stop offset="100%" stop-color="#3A3A3E"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF7A29"/>
+      <stop offset="100%" stop-color="#FF9152"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" rx="88" fill="url(#bg)"/>
+  <!-- Score ring -->
+  <circle cx="200" cy="200" r="118" fill="none" stroke="#3A3A3E" stroke-width="20"/>
+  <circle cx="200" cy="200" r="118" fill="none" stroke="url(#ring)" stroke-width="20" stroke-linecap="round" stroke-dasharray="556 742" stroke-dashoffset="0"/>
+  <!-- SG monogram -->
+  <text x="200" y="232" font-family="'Google Sans', 'Segoe UI', Arial, sans-serif" font-size="92" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="-4">SG</text>
+</svg>

@@ -70,11 +70,11 @@ When no JD is provided, the system runs in **pure resume analysis mode**: JD Mat
 
 ```
 ┌──────────────────────────────┐        ┌──────────────────────────────────┐
-│         FRONTEND (SPA)        │ HTTPS  │            BACKEND (API)         │
-│  React + Vite + Tailwind      │◄──────►│  FastAPI (Python) — stateless   │
-│  IndexedDB (2-day TTL cache)  │  JSON  │  NLP pipeline (async workers)   │
-│  Framer Motion animations     │        │  Redis (ephemeral cache, TTL)   │
-│  Dark/Light theme             │        │  No permanent document storage  │
+│         FRONTEND (SPA)       |  HTTPS │            BACKEND (API)         │
+│  React + Vite + Tailwind     │◄──────►│  FastAPI (Python) — stateless    │
+│  IndexedDB (2-day TTL cache) │  JSON  │  NLP pipeline (async workers)    │
+│  Framer Motion animations    │        │  Redis (ephemeral cache, TTL)    │
+│  Dark/Light theme            │        │  No permanent document storage   │
 └──────────────────────────────┘        └──────────────────────────────────┘
         Deployed: Vercel/Netlify/            Deployed: Cloud Run / Fargate
         Firebase Hosting (CDN)                (containers, auto-scale to 0)
